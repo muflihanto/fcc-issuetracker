@@ -20,8 +20,8 @@ app.use(cors({ origin: "*" })); //For FCC testing purposes only
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-myDB(async (client) => {
-  const myDataBase = await client.db("fcc-project");
+myDB((client) => {
+  const myDataBase = client.db("fcc-issuetracker");
 
   //Sample front-end
   app.route("/:project/").get(function (req, res) {
