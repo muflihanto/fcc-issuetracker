@@ -121,6 +121,29 @@ module.exports = function (app, myDataBase) {
     })
 
     .delete(function (req, res) {
-      let project = req.params.project;
+      if (req.body._id === undefined) return res.send({ error: "missing _id" });
+
+      const collection = myDataBase.collection(req.params.project);
+      let _id;
+      const noDelete = () => {
+        res.send({ error: "could not delete", _id: req.body._id });
+      };
+      try {
+        _id = new ObjectId(req.body._id);
+      } catch {
+        return noDelete();
+      }
+      collection
+        .deleteOne({ _id })
+        .then((result) => {
+          if (result.deletedCount === 1) {
+            res.send({ result: "successfully deleted", _id: _id });
+          } else {
+            noDelete();
+          }
+        })
+        .catch(() => {
+          noDelete();
+        });
     });
 };
