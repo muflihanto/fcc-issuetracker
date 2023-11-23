@@ -87,23 +87,37 @@ module.exports = function (app, myDataBase) {
 
       if (Object.keys(updatedIssue).length === 0) return res.send({ error: "no update field(s) sent", _id: _id });
 
-      try {
-        collection
-          .findOneAndUpdate(
-            { _id: new ObjectId(_id) },
-            {
-              $set: {
-                ...updatedIssue,
-                updated_on: new Date().toJSON(),
-              },
-            }
-          )
-          .then((doc) => {
-            res.send({ result: "successfully updated", _id: doc._id });
-          });
-      } catch {
+      const noUpdate = () => {
         res.send({ error: "could not update", _id: _id });
+      };
+
+      // Check for invalid id input
+      try {
+        _id = new ObjectId(_id);
+      } catch {
+        return noUpdate();
       }
+
+      collection
+        .findOneAndUpdate(
+          { _id },
+          {
+            $set: {
+              ...updatedIssue,
+              updated_on: new Date().toJSON(),
+            },
+          }
+        )
+        .then((doc) => {
+          if (doc !== null) {
+            res.send({ result: "successfully updated", _id: doc._id });
+          } else {
+            noUpdate();
+          }
+        })
+        .catch((er) => {
+          noUpdate();
+        });
     })
 
     .delete(function (req, res) {
