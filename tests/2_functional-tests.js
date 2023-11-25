@@ -166,7 +166,25 @@ suite("Functional Tests", function () {
         done();
       });
   });
-  // TODO: Update one field on an issue: PUT request to /api/issues/{project}
+  // Update one field on an issue: PUT request to /api/issues/{project}
+  test("Update one field on an issue: PUT request to /api/issues/{project}", function (done) {
+    const _id = registeredIssue.filter((issue) => issue.issue_title === "title-required")[0]._id;
+    chai
+      .request(server)
+      .keepOpen()
+      .put(url)
+      .send({
+        _id,
+        open: "false",
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        const result = JSON.parse(res.text);
+        assert.strictEqual(result._id, _id, `${result._id} is not equal ${_id}`);
+        assert.strictEqual(result.result, "successfully updated");
+        done();
+      });
+  });
   // TODO: Update multiple fields on an issue: PUT request to /api/issues/{project}
   // TODO: Update an issue with missing _id: PUT request to /api/issues/{project}
   // TODO: Update an issue with no fields to update: PUT request to /api/issues/{project}
