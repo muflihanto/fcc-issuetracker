@@ -10,7 +10,7 @@ chai.use(chaiHttp);
 suite("Functional Tests", function () {
   this.timeout(5000);
   let url = `/api/issues/api_test_${randomInt(1000, 10000)}`;
-  let registeredIssue;
+  let registeredIssues;
   // Create an issue with every field: POST request to /api/issues/{project}
   test("Create an issue with every field: POST request to /api/issues/{project}", function (done) {
     const input = {
@@ -112,7 +112,7 @@ suite("Functional Tests", function () {
             assert.isString(issue.updated_on, issue.updated_on + " is not a string");
           }
         }
-        registeredIssue = result;
+        registeredIssues = result;
         done();
       });
   });
@@ -168,7 +168,7 @@ suite("Functional Tests", function () {
   });
   // Update one field on an issue: PUT request to /api/issues/{project}
   test("Update one field on an issue: PUT request to /api/issues/{project}", function (done) {
-    const _id = registeredIssue.filter((issue) => issue.issue_title === "title-required")[0]._id;
+    const _id = registeredIssues.filter((issue) => issue.issue_title === "title")[0]._id;
     chai
       .request(server)
       .keepOpen()
@@ -185,7 +185,26 @@ suite("Functional Tests", function () {
         done();
       });
   });
-  // TODO: Update multiple fields on an issue: PUT request to /api/issues/{project}
+  // Update multiple fields on an issue: PUT request to /api/issues/{project}
+  test("Update multiple fields on an issue: PUT request to /api/issues/{project}", function (done) {
+    const _id = registeredIssues.filter((issue) => issue.issue_title === "title-required")[0]._id;
+    chai
+      .request(server)
+      .keepOpen()
+      .put(url)
+      .send({
+        _id,
+        assigned_to: "assigned_to",
+        status_text: "status_text",
+      })
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        const result = JSON.parse(res.text);
+        assert.strictEqual(result._id, _id, `${result._id} is not equal ${_id}`);
+        assert.strictEqual(result.result, "successfully updated");
+        done();
+      });
+  });
   // TODO: Update an issue with missing _id: PUT request to /api/issues/{project}
   // TODO: Update an issue with no fields to update: PUT request to /api/issues/{project}
   // TODO: Update an issue with an invalid _id: PUT request to /api/issues/{project}
