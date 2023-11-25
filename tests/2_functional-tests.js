@@ -205,9 +205,52 @@ suite("Functional Tests", function () {
         done();
       });
   });
-  // TODO: Update an issue with missing _id: PUT request to /api/issues/{project}
-  // TODO: Update an issue with no fields to update: PUT request to /api/issues/{project}
-  // TODO: Update an issue with an invalid _id: PUT request to /api/issues/{project}
+  // Update an issue with missing _id: PUT request to /api/issues/{project}
+  test("Update an issue with missing _id: PUT request to /api/issues/{project}", function (done) {
+    chai
+      .request(server)
+      .keepOpen()
+      .put(url)
+      .send({})
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        const result = JSON.parse(res.text);
+        assert.strictEqual(result.error, "missing _id");
+        done();
+      });
+  });
+  // Update an issue with no fields to update: PUT request to /api/issues/{project}
+  test("Update an issue with no fields to update: PUT request to /api/issues/{project}", function (done) {
+    const _id = registeredIssues.filter((issue) => issue.issue_title === "title-required")[0]._id;
+    chai
+      .request(server)
+      .keepOpen()
+      .put(url)
+      .send({ _id })
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        const result = JSON.parse(res.text);
+        assert.strictEqual(result._id, _id, `${result._id} is not equal ${_id}`);
+        assert.strictEqual(result.error, "no update field(s) sent");
+        done();
+      });
+  });
+  // Update an issue with an invalid _id: PUT request to /api/issues/{project}
+  test("Update an issue with an invalid _id: PUT request to /api/issues/{project}", function (done) {
+    const _id = "an-invalid-id";
+    chai
+      .request(server)
+      .keepOpen()
+      .put(url)
+      .send({ _id })
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        const result = JSON.parse(res.text);
+        assert.strictEqual(result._id, _id, `${result._id} is not equal ${_id}`);
+        assert.strictEqual(result.error, "could not update");
+        done();
+      });
+  });
   // TODO: Delete an issue: DELETE request to /api/issues/{project}
   // TODO: Delete an issue with an invalid _id: DELETE request to /api/issues/{project}
   // TODO: Delete an issue with missing _id: DELETE request to /api/issues/{project}
