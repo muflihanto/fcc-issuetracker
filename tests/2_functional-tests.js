@@ -251,7 +251,50 @@ suite("Functional Tests", function () {
         done();
       });
   });
-  // TODO: Delete an issue: DELETE request to /api/issues/{project}
-  // TODO: Delete an issue with an invalid _id: DELETE request to /api/issues/{project}
-  // TODO: Delete an issue with missing _id: DELETE request to /api/issues/{project}
+  // Delete an issue: DELETE request to /api/issues/{project}
+  test("Delete an issue: DELETE request to /api/issues/{project}", function (done) {
+    const _id = registeredIssues.filter((issue) => issue.issue_title === "title-required")[0]._id;
+    chai
+      .request(server)
+      .keepOpen()
+      .delete(url)
+      .send({ _id })
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        const result = JSON.parse(res.text);
+        assert.strictEqual(result._id, _id, `${result._id} is not equal ${_id}`);
+        assert.strictEqual(result.result, "successfully deleted");
+        done();
+      });
+  });
+  // Delete an issue with an invalid _id: DELETE request to /api/issues/{project}
+  test("Delete an issue with an invalid _id: DELETE request to /api/issues/{project}", function (done) {
+    const _id = "an_invalid_id";
+    chai
+      .request(server)
+      .keepOpen()
+      .delete(url)
+      .send({ _id })
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        const result = JSON.parse(res.text);
+        assert.strictEqual(result._id, _id, `${result._id} is not equal ${_id}`);
+        assert.strictEqual(result.error, "could not delete");
+        done();
+      });
+  });
+  // Delete an issue with missing _id: DELETE request to /api/issues/{project}
+  test("Delete an issue with missing _id: DELETE request to /api/issues/{project}", function (done) {
+    chai
+      .request(server)
+      .keepOpen()
+      .delete(url)
+      .send({})
+      .end(function (err, res) {
+        assert.equal(res.status, 200);
+        const result = JSON.parse(res.text);
+        assert.strictEqual(result.error, "missing _id");
+        done();
+      });
+  });
 });
